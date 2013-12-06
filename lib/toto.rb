@@ -9,7 +9,7 @@ if RUBY_PLATFORM =~ /win32/
   require 'maruku'
   Markdown = Maruku
 else
-  require 'rdiscount'
+  require 'github/markdown'
 end
 
 require 'builder'
@@ -40,8 +40,8 @@ module Toto
     end
 
     def markdown text
-      if (options = @config[:markdown])
-        Markdown.new(text.to_s.strip, *(options.eql?(true) ? [] : options)).to_html
+      if @config[:markdown]
+        GitHub::Markdown.render(text.to_s.strip)
       else
         text.strip
       end
