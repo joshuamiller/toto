@@ -78,6 +78,17 @@ module Toto
       end}.merge archives
     end
 
+    def tag tag, type = :html
+      self[:tag] = tag
+      articles = type == :html ? self.articles.reverse : self.articles
+      {:articles =>
+       articles.map do |article|
+         Article.new article, @config
+       end.select do |article|
+         article[:tags] && article[:tags].include?(tag)
+       end}.merge archives
+    end
+
     def archives filter = ""
       entries = ! self.articles.empty??
         self.articles.select do |a|
@@ -113,6 +124,8 @@ module Toto
               context[article(route), :article]
             else http 400
           end
+        elsif route.first =~ /tag/
+          context[tag(route[1], type), :tag]
         elsif respond_to?(path)
           context[send(path, type), path.to_sym]
         elsif (repo = @config[:github][:repos].grep(/#{path}/).first) &&
@@ -165,8 +178,7 @@ module Toto
       end
 
       def render page, type
-        content = to_html page, @config
-        type == :html ? to_html(:layout, @config, &Proc.new { content }) : send(:"to_#{type}", page)
+        type == :html ? to_html(:layout, @config, &Proc.new { to_html(page, @config) }) : send(:"to_#{type}", page)
       end
 
       def to_xml page
