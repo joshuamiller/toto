@@ -81,7 +81,8 @@ module Toto
     def tag tag, type = :html
       self[:tag] = tag
       articles = type == :html ? self.articles.reverse : self.articles
-      {:articles =>
+      {:tag => tag,
+       :articles =>
        articles.map do |article|
          Article.new article, @config
        end.select do |article|
